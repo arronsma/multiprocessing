@@ -1,4 +1,4 @@
-flag = -std=c++11
+flag = -std=c++11 -lpthread
 
 main: main.o resource.o
 	g++ main.o resource.o ${flag}
