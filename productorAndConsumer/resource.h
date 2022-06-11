@@ -2,6 +2,7 @@
 #define RESOURCE_H
 
 #include <iostream>
+#include <condition_variable>
 #include <mutex>
 #include <vector>
 #define ErrorContent -10086
@@ -10,7 +11,8 @@ private:
     static Resource* pInstance; 
     static std::mutex mut; //mut for constructor
 
-
+    std::condition_variable p_queue;
+    std::condition_variable c_queue;
     int readIdx; //read pos to access
     int writeIdx; // write pos to access
 

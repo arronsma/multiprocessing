@@ -12,36 +12,40 @@ Resource* Resource::getInstance(int size){
 }
 
 void Resource::addReadIdx(){
-    readIdx = (readIdx + 1) % size;
+    readIdx = (readIdx + 1) % cap;
 }
 
 void Resource::addWriteIdx(){
-    writeIdx = (writeIdx + 1) % size;
+    writeIdx = (writeIdx + 1) % cap;
 }
 
 bool Resource::isFull(){
-    return (writeIdx + 1) % size == readIdx;
+    return (writeIdx + 1) % cap == readIdx;
 }
 
 bool Resource::isEmpty(){
     return readIdx == writeIdx;
 }
 
-void Resource::addItem(int content){
-    if (isFull()){
+void Resource::addItem(int content){ // add item is productor
+    std::unique_lock<std::mutex> lock(mut);
+    while (isFull()){
         std::cout << "the vector is full" << std::endl; 
-        return; 
+        p_queue.wait(lock);
     }
     resourceVec[writeIdx] = content;
     addWriteIdx();
+    c_queue.notify_one();
 }
 
 int Resource::consumItem(){
-    if (isEmpty()){
+    std::unique_lock<std::mutex> lock(mut);
+    while (isEmpty()){
         std::cout << "the vector is empty" << std::endl; 
-        return ErrorContent; 
+        c_queue.wait(lock);
     }
     int res = resourceVec[readIdx];
     addReadIdx();
+    p_queue.notify_one();
     return res;
 }
